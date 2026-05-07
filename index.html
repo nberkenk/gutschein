@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>🎁 Geschenk wird geladen</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body{
+        margin:0;
+        background:#0d0d0d;
+        color:white;
+        font-family:Arial, sans-serif;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:100vh;
+        text-align:center;
+        overflow:hidden;
+    }
+
+    #container{
+        max-width:500px;
+    }
+
+    #gif{
+        display:none;
+        width:100%;
+        border-radius:12px;
+        margin-top:20px;
+    }
+
+    #timer{
+        font-size:28px;
+        margin-top:15px;
+    }
+
+    .confetti{
+        position:fixed;
+        width:10px;
+        height:10px;
+        top:-10px;
+        animation:fall linear forwards;
+    }
+
+    @keyframes fall{
+        to{
+            transform:translateY(110vh) rotate(720deg);
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div id="container">
+    <h1>🎁 Dein Geschenk wird vorbereitet...</h1>
+
+    <div id="timer">10</div>
+
+    <img id="gif" src="DEIN_GIF_URL" alt="fun gif">
+
+    <audio id="audio" src="DEIN_MP3_URL"></audio>
+</div>
+
+<script>
+const redirectURL = "DEIN_GUTSCHEIN_LINK";
+const gif = document.getElementById("gif");
+const audio = document.getElementById("audio");
+const timer = document.getElementById("timer");
+
+// --- KONFETTI ---
+function confetti(){
+    for(let i=0;i<120;i++){
+        let c=document.createElement("div");
+        c.className="confetti";
+        c.style.left=Math.random()*100+"vw";
+        c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+        c.style.animationDuration=(2+Math.random()*3)+"s";
+        document.body.appendChild(c);
+    }
+}
+
+// Start sofort
+confetti();
+
+// GIF + Sound starten
+gif.style.display = "block";
+audio.play().catch(()=> {
+    console.log("Autoplay blockiert – ggf. Klick nötig auf Handy");
+});
+
+// 10 Sekunden Countdown
+let time = 10;
+
+let interval = setInterval(() => {
+    time--;
+    timer.innerText = time;
+
+    if(time <= 0){
+        clearInterval(interval);
+
+        // Finale Konfetti
+        confetti();
+
+        setTimeout(() => {
+            window.location.href = redirectURL;
+        }, 2000);
+    }
+
+}, 1000);
+
+</script>
+
+</body>
+</html>
