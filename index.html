@@ -90,6 +90,21 @@ const timerEl = document.getElementById("timer");
 
 let confettiLoop;
 
+// 📳 leichte Vibration
+function vibrateSoft(){
+    if (navigator.vibrate) {
+        navigator.vibrate(80);
+    }
+}
+
+// 📳 starke Finale-Vibration
+function vibrateStrong(){
+    if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200, 100, 500]);
+    }
+}
+
+// 🌧 Dauer-Konfetti starten
 function startConfettiRain(){
     confettiLoop = setInterval(confetti, 250);
 }
@@ -98,20 +113,37 @@ function stopConfettiRain(){
     clearInterval(confettiLoop);
 }
 
+// 🎊 Konfetti erzeugen + Vibration
+function confetti(){
+
+    vibrateSoft(); // 📳 jedes Konfetti triggert leichte Vibration
+
+    for(let i=0;i<120;i++){
+        let c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random()*100 + "vw";
+        c.style.background = `hsl(${Math.random()*360},100%,50%)`;
+        c.style.animationDuration = (2 + Math.random()*3) + "s";
+        document.body.appendChild(c);
+
+        setTimeout(() => c.remove(), 6000);
+    }
+}
+
 btn.addEventListener("click", () => {
 
     btn.style.display = "none";
 
-    // 🎊 Dauer-Konfetti starten
+    // 🌧 Dauer-Konfetti + 📳 Vibration
     startConfettiRain();
 
-    // 🎵 Sound starten (nach Klick erlaubt)
+    // 🎵 Sound
     audio.play().catch(()=>console.log("Audio blockiert"));
 
-    // 🖼️ GIF anzeigen
+    // 🖼 GIF
     gif.style.display = "block";
 
-    // ⏱️ Timer anzeigen
+    // ⏱ Timer
     timerEl.style.display = "block";
 
     confetti();
@@ -126,8 +158,11 @@ btn.addEventListener("click", () => {
         if(time <= 0){
             clearInterval(interval);
 
-            // 🔥 Dauer-Konfetti stoppen + Finale Explosion
+            // 🛑 Regen stoppen
             stopConfettiRain();
+
+            // 💥 Finale Effekte
+            vibrateStrong();
             confetti();
 
             setTimeout(() => {
@@ -138,21 +173,6 @@ btn.addEventListener("click", () => {
     }, 1000);
 
 });
-
-// 🎊 Konfetti-Einzelpartikel
-function confetti(){
-    for(let i=0;i<120;i++){
-        let c = document.createElement("div");
-        c.className = "confetti";
-        c.style.left = Math.random()*100 + "vw";
-        c.style.background = `hsl(${Math.random()*360},100%,50%)`;
-        c.style.animationDuration = (2 + Math.random()*3) + "s";
-        document.body.appendChild(c);
-
-        // Cleanup (verhindert Lag)
-        setTimeout(() => c.remove(), 6000);
-    }
-}
 
 </script>
 
