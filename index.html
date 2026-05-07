@@ -17,11 +17,36 @@
         height:100vh;
         text-align:center;
         overflow:hidden;
+        transition: transform 1.2s ease-out;
+    }
+
+    /* 🎥 Zoom */
+    .zoom-in {
+        animation: zoomIn 1.2s ease-out forwards;
+    }
+
+    @keyframes zoomIn {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.8); }
+    }
+
+    /* 🌈 Puls Background */
+    .pulse-bg {
+        animation: pulseBg 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulseBg {
+        0% { background-color:#0d0d0d; }
+        25% { background-color:#1a1033; }
+        50% { background-color:#2a0f4a; }
+        75% { background-color:#1a1033; }
+        100% { background-color:#0d0d0d; }
     }
 
     #container{
         max-width:500px;
         width:90%;
+        z-index:2;
     }
 
     button{
@@ -47,23 +72,22 @@
         display:none;
     }
 
-    .confetti{
+    /* 🎆 Canvas */
+    #fireworks{
         position:fixed;
-        width:10px;
-        height:10px;
-        top:-10px;
-        animation:fall linear forwards;
-    }
-
-    @keyframes fall{
-        to{
-            transform:translateY(110vh) rotate(720deg);
-        }
+        top:0;
+        left:0;
+        width:100vw;
+        height:100vh;
+        pointer-events:none;
+        z-index:999;
     }
 </style>
 </head>
 
 <body>
+
+<canvas id="fireworks"></canvas>
 
 <div id="container">
 
@@ -88,54 +112,94 @@ const gif = document.getElementById("gif");
 const audio = document.getElementById("audio");
 const timerEl = document.getElementById("timer");
 
-let confettiLoop;
-
-// 📳 leichte Vibration
+/* 📳 Vibration */
 function vibrateSoft(){
-    if (navigator.vibrate) {
-        navigator.vibrate(80);
-    }
+    if (navigator.vibrate) navigator.vibrate(80);
 }
 
-// 📳 starke Finale-Vibration
 function vibrateStrong(){
-    if (navigator.vibrate) {
-        navigator.vibrate([200, 100, 200, 100, 500]);
+    if (navigator.vibrate) navigator.vibrate([200,100,200,100,600]);
+}
+
+/* 🎆 Canvas Setup */
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+function createFirework(x, y){
+    const colors = ["#ff4d4d","#ffd93d","#6a5cff","#00ffcc","#ff7ee2"];
+
+    for(let i=0;i<80;i++){
+        particles.push({
+            x: x,
+            y: y,
+            angle: Math.random() * Math.PI * 2,
+            speed: Math.random() * 6 + 2,
+            radius: Math.random()*3+1,
+            color: colors[Math.floor(Math.random()*colors.length)],
+            alpha: 1
+        });
     }
 }
 
-// 🌧 Dauer-Konfetti starten
-function startConfettiRain(){
-    confettiLoop = setInterval(confetti, 250);
+function updateFireworks(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    particles.forEach((p, index) => {
+        p.x += Math.cos(p.angle) * p.speed;
+        p.y += Math.sin(p.angle) * p.speed;
+        p.alpha -= 0.015;
+
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+        ctx.fill();
+
+        if(p.alpha <= 0){
+            particles.splice(index,1);
+        }
+    });
+
+    requestAnimationFrame(updateFireworks);
 }
 
-function stopConfettiRain(){
-    clearInterval(confettiLoop);
-}
+updateFireworks();
 
-// 🎊 Konfetti erzeugen + Vibration
-function confetti(){
+/* 🎯 Finale Explosion */
+function finalFireworks(){
 
-    vibrateSoft(); // 📳 jedes Konfetti triggert leichte Vibration
+    document.body.classList.add("zoom-in");
+    document.body.classList.add("pulse-bg");
 
-    for(let i=0;i<120;i++){
-        let c = document.createElement("div");
-        c.className = "confetti";
-        c.style.left = Math.random()*100 + "vw";
-        c.style.background = `hsl(${Math.random()*360},100%,50%)`;
-        c.style.animationDuration = (2 + Math.random()*3) + "s";
-        document.body.appendChild(c);
+    vibrateStrong();
 
-        setTimeout(() => c.remove(), 6000);
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+
+    for(let i=0;i<8;i++){
+        setTimeout(() => {
+            createFirework(
+                cx + (Math.random()*200-100),
+                cy + (Math.random()*200-100)
+            );
+        }, i * 200);
     }
 }
 
+/* 🎬 Start */
 btn.addEventListener("click", () => {
 
     btn.style.display = "none";
 
-    // 🌧 Dauer-Konfetti + 📳 Vibration
-    startConfettiRain();
+    // 🎊 Starteffekt
+    createFirework(window.innerWidth/2, window.innerHeight/2);
+    vibrateSoft();
 
     // 🎵 Sound
     audio.play().catch(()=>console.log("Audio blockiert"));
@@ -145,8 +209,6 @@ btn.addEventListener("click", () => {
 
     // ⏱ Timer
     timerEl.style.display = "block";
-
-    confetti();
 
     let time = 10;
 
@@ -158,19 +220,8 @@ btn.addEventListener("click", () => {
         if(time <= 0){
             clearInterval(interval);
 
-            // 🛑 Regen stoppen
-            stopConfettiRain();
+            finalFireworks();
 
-            // 📳 starke Android-Vibration
-            if (navigator.vibrate) {
-                navigator.vibrate([300, 150, 300, 150, 600]);
-            }
-            
-            // 💥 große Explosion (viel mehr Konfetti auf einmal)
-            for(let j=0;j<5;j++){
-                setTimeout(() => confetti(), j * 200);
-            }
-            
             setTimeout(() => {
                 window.location.href = redirectURL;
             }, 2500);
