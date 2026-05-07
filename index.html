@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>🎁 Geschenk wird geladen</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎁 Geschenk</title>
 
 <style>
     body{
@@ -21,18 +21,30 @@
 
     #container{
         max-width:500px;
+        width:90%;
+    }
+
+    button{
+        padding:15px 25px;
+        font-size:18px;
+        border:none;
+        border-radius:12px;
+        cursor:pointer;
+        background:#22c55e;
+        color:white;
     }
 
     #gif{
         display:none;
         width:100%;
-        border-radius:12px;
         margin-top:20px;
+        border-radius:12px;
     }
 
     #timer{
-        font-size:28px;
+        font-size:32px;
         margin-top:15px;
+        display:none;
     }
 
     .confetti{
@@ -54,61 +66,76 @@
 <body>
 
 <div id="container">
-    <h1>🎁 Dein Geschenk wird vorbereitet...</h1>
+
+    <h1>🎁 Bereit für dein Geschenk?</h1>
+
+    <button id="startBtn">Geschenk öffnen</button>
 
     <div id="timer">10</div>
 
-    <img id="gif" src="DEIN_GIF_URL">
+    <img id="gif" src="gif.gif">
 
     <audio id="audio" src="aber_glei_ikea.mp3"></audio>
+
 </div>
 
 <script>
+
 const redirectURL = "https://links.info.email.ikea.com/f/a/Eb4TX--kB0jvyqLYHhql_w~~/AAA2mBA~/_TnRThxSPJ8XCpcG_YrzjF9FrNjuC7Lu0l5XjMnm9jTNft99-LPaEOYL5N6AaHM_eHqFPpFR8S5unuTpKcUQ6svtqf7mq3SdgTSxQHkbXuZdNxKWjZ4fIpOhs7s3DKdG-SVnHKgXboreyvosh-BMH55BqaBKFXbkbJpz5Zm0WJqXNV20UIOW_2xEPCgHG6EKuerpFmGxMU-J8bmLiHUc2DPVsjDrq-COcLUsfWWd942KJVxFSdlRvw5RKC8LcO-G4SXvct5KrvU9ie3XKL2X672ebsRUKZYyHnTeUVe0YY2QjyJIltfnWw9sFHpFeXFsnLtva9gODvQRCbI6-FJPQOD7uz_80cgfQTbJpUGnYa4Sudf3TQ4nPVhhoDH7lAjIb7a7CsN0FjhrNTjxnkBPpg~~";
+
+const btn = document.getElementById("startBtn");
 const gif = document.getElementById("gif");
 const audio = document.getElementById("audio");
-const timer = document.getElementById("timer");
+const timerEl = document.getElementById("timer");
 
-// --- KONFETTI ---
+btn.addEventListener("click", () => {
+
+    btn.style.display = "none";
+
+    // 🎵 Sound starten (funktioniert jetzt sicher!)
+    audio.play().catch(()=>console.log("Audio blockiert"));
+
+    // 🎉 GIF anzeigen
+    gif.style.display = "block";
+
+    // ⏱ Timer anzeigen
+    timerEl.style.display = "block";
+
+    // 🎊 erste Konfetti-Explosion
+    confetti();
+
+    let time = 10;
+
+    const interval = setInterval(() => {
+
+        time--;
+        timerEl.innerText = time;
+
+        if(time <= 0){
+            clearInterval(interval);
+
+            // 🎊 Finale Konfetti
+            confetti();
+
+            setTimeout(() => {
+                window.location.href = redirectURL;
+            }, 2000);
+        }
+
+    }, 1000);
+
+});
+
 function confetti(){
     for(let i=0;i<120;i++){
-        let c=document.createElement("div");
-        c.className="confetti";
-        c.style.left=Math.random()*100+"vw";
-        c.style.background=`hsl(${Math.random()*360},100%,50%)`;
-        c.style.animationDuration=(2+Math.random()*3)+"s";
+        let c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random()*100 + "vw";
+        c.style.background = `hsl(${Math.random()*360},100%,50%)`;
+        c.style.animationDuration = (2 + Math.random()*3) + "s";
         document.body.appendChild(c);
     }
 }
-
-// Start sofort
-confetti();
-
-// GIF + Sound starten
-gif.style.display = "block";
-audio.play().catch(()=> {
-    console.log("Autoplay blockiert – ggf. Klick nötig auf Handy");
-});
-
-// 10 Sekunden Countdown
-let time = 10;
-
-let interval = setInterval(() => {
-    time--;
-    timer.innerText = time;
-
-    if(time <= 0){
-        clearInterval(interval);
-
-        // Finale Konfetti
-        confetti();
-
-        setTimeout(() => {
-            window.location.href = redirectURL;
-        }, 2000);
-    }
-
-}, 1000);
 
 </script>
 
