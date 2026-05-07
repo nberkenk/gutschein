@@ -17,13 +17,20 @@
         height:100vh;
         text-align:center;
         overflow:hidden;
-        transition: transform 1.2s ease-out;
     }
 
     #container{
         max-width:500px;
         width:90%;
         z-index:2;
+    }
+
+    /* 🔉 Hinweistext */
+    #soundHint{
+        margin-bottom:15px;
+        font-size:16px;
+        opacity:0.85;
+        color:#fbbf24;
     }
 
     button{
@@ -43,37 +50,37 @@
         border-radius:12px;
     }
 
-    /* ⏱ TIMER STYLE (NEU) */
+    /* ⏱ TIMER */
     #timer{
         font-size:48px;
         font-weight:bold;
         margin-top:15px;
         display:none;
         text-shadow:0 0 10px rgba(255,255,255,0.3);
-        transition: transform 0.15s ease, color 0.2s ease;
+        transition:transform 0.15s ease, color 0.2s ease;
     }
 
     /* 🎥 Zoom */
-    .zoom-in {
-        animation: zoomIn 1.2s ease-out forwards;
+    .zoom-in{
+        animation:zoomIn 1.2s ease-out forwards;
     }
 
-    @keyframes zoomIn {
-        0% { transform: scale(1); }
-        100% { transform: scale(1.7); }
+    @keyframes zoomIn{
+        0%{transform:scale(1);}
+        100%{transform:scale(1.7);}
     }
 
     /* 📳 Shake */
-    .shake {
-        animation: shake 0.1s infinite;
+    .shake{
+        animation:shake 0.1s infinite;
     }
 
-    @keyframes shake {
-        0% { transform: translate(2px,2px); }
-        25% { transform: translate(-2px,3px); }
-        50% { transform: translate(3px,-2px); }
-        75% { transform: translate(-3px,2px); }
-        100% { transform: translate(2px,-2px); }
+    @keyframes shake{
+        0%{transform:translate(2px,2px);}
+        25%{transform:translate(-2px,3px);}
+        50%{transform:translate(3px,-2px);}
+        75%{transform:translate(-3px,2px);}
+        100%{transform:translate(2px,-2px);}
     }
 
     /* 🌧 Konfetti */
@@ -102,44 +109,18 @@
         pointer-events:none;
         z-index:999;
     }
-
-    /* 🎧 Overlay */
-    #audioOverlay{
-        position:fixed;
-        top:0;
-        left:0;
-        width:100vw;
-        height:100vh;
-        background:rgba(0,0,0,0.92);
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        z-index:10000;
-    }
-
-    #overlayBox{
-        padding:20px 30px;
-        background:#1f2937;
-        border-radius:16px;
-        font-size:18px;
-        cursor:pointer;
-        text-align:center;
-    }
 </style>
 </head>
 
 <body>
-
-<!-- 🎧 AUDIO OVERLAY -->
-<div id="audioOverlay">
-    <div id="overlayBox">🔊 Tippe für Sound & Erlebnis 🎁</div>
-</div>
 
 <canvas id="fireworks"></canvas>
 
 <div id="container">
 
     <h1 id="title">🎁 Bereit für dein Geschenk?</h1>
+
+    <div id="soundHint">🔉 Ton einschalten für das volle Erlebnis!</div>
 
     <button id="startBtn">Geschenk öffnen</button>
 
@@ -161,34 +142,17 @@ const audio = document.getElementById("audio");
 const timerEl = document.getElementById("timer");
 const title = document.getElementById("title");
 
-const confettiColors = [
-    "#ff4d4d",
-    "#ffd93d",
-    "#6a5cff",
-    "#00ffcc",
-    "#ff7ee2"
-];
-
-/* 🎧 Unlock */
-const overlay = document.getElementById("audioOverlay");
-const overlayBox = document.getElementById("overlayBox");
-let audioUnlocked = false;
-
-overlayBox.addEventListener("click", ()=>{
-    audioUnlocked = true;
-    overlay.style.display = "none";
-});
+const colors = ["#ff4d4d","#ffd93d","#6a5cff","#00ffcc","#ff7ee2"];
 
 /* 📳 Vibration */
 function vibrateSoft(){
-    if (navigator.vibrate) navigator.vibrate(80);
+    if(navigator.vibrate) navigator.vibrate(80);
 }
-
 function vibrateStrong(){
-    if (navigator.vibrate) navigator.vibrate([200,100,200,100,600]);
+    if(navigator.vibrate) navigator.vibrate([200,100,200,100,600]);
 }
 
-/* 🌧 Start-Konfetti */
+/* 🌧 Konfetti */
 function startRainConfetti(){
     setInterval(()=>{
         let c=document.createElement("div");
@@ -211,8 +175,6 @@ canvas.height=window.innerHeight;
 let particles=[];
 
 function createFirework(x,y,amount){
-    const colors=confettiColors;
-
     for(let i=0;i<amount;i++){
         particles.push({
             x,y,
@@ -259,7 +221,7 @@ function finalExplosion(){
 
     for(let i=0;i<35;i++){
         setTimeout(()=>{
-            createFirework(cx+(Math.random()*300-150),cy+(Math.random()*300-150),200);
+            createFirework(cx+(Math.random()*300-150),cy+(Math.random()*300-150),180);
         },i*50);
     }
 }
@@ -268,15 +230,13 @@ function finalExplosion(){
 btn.addEventListener("click",()=>{
 
     btn.style.display="none";
-
     title.innerText="🎁🤪🎉";
 
     startRainConfetti();
     vibrateSoft();
 
-    if(audioUnlocked){
-        audio.play().catch(()=>{});
-    }
+    // 🎵 SOUND direkt hier
+    audio.play().catch(()=>{});
 
     gif.style.display="block";
     timerEl.style.display="block";
@@ -288,8 +248,7 @@ btn.addEventListener("click",()=>{
         time--;
         timerEl.innerText=time;
 
-        // 🎨 Farbwechsel + Pop
-        timerEl.style.color = confettiColors[Math.floor(Math.random()*confettiColors.length)];
+        timerEl.style.color = colors[Math.floor(Math.random()*colors.length)];
         timerEl.style.transform="scale(1.4)";
         setTimeout(()=>timerEl.style.transform="scale(1)",120);
 
