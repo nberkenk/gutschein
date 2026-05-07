@@ -88,20 +88,32 @@ const gif = document.getElementById("gif");
 const audio = document.getElementById("audio");
 const timerEl = document.getElementById("timer");
 
+let confettiLoop;
+
+function startConfettiRain(){
+    confettiLoop = setInterval(confetti, 250);
+}
+
+function stopConfettiRain(){
+    clearInterval(confettiLoop);
+}
+
 btn.addEventListener("click", () => {
 
     btn.style.display = "none";
 
-    // 🎵 Sound starten (funktioniert jetzt sicher!)
+    // 🎊 Dauer-Konfetti starten
+    startConfettiRain();
+
+    // 🎵 Sound starten (nach Klick erlaubt)
     audio.play().catch(()=>console.log("Audio blockiert"));
 
-    // 🎉 GIF anzeigen
+    // 🖼️ GIF anzeigen
     gif.style.display = "block";
 
-    // ⏱ Timer anzeigen
+    // ⏱️ Timer anzeigen
     timerEl.style.display = "block";
 
-    // 🎊 erste Konfetti-Explosion
     confetti();
 
     let time = 10;
@@ -114,7 +126,8 @@ btn.addEventListener("click", () => {
         if(time <= 0){
             clearInterval(interval);
 
-            // 🎊 Finale Konfetti
+            // 🔥 Dauer-Konfetti stoppen + Finale Explosion
+            stopConfettiRain();
             confetti();
 
             setTimeout(() => {
@@ -126,6 +139,7 @@ btn.addEventListener("click", () => {
 
 });
 
+// 🎊 Konfetti-Einzelpartikel
 function confetti(){
     for(let i=0;i<120;i++){
         let c = document.createElement("div");
@@ -134,6 +148,9 @@ function confetti(){
         c.style.background = `hsl(${Math.random()*360},100%,50%)`;
         c.style.animationDuration = (2 + Math.random()*3) + "s";
         document.body.appendChild(c);
+
+        // Cleanup (verhindert Lag)
+        setTimeout(() => c.remove(), 6000);
     }
 }
 
