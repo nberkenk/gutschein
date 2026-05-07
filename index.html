@@ -8,7 +8,7 @@
 <style>
     body{
         margin:0;
-        background:#0d0d0d;
+        background:#FBD914;
         color:white;
         font-family:Arial, sans-serif;
         display:flex;
@@ -25,12 +25,11 @@
         z-index:2;
     }
 
-    /* 🔉 Hinweistext */
     #soundHint{
         margin-bottom:15px;
         font-size:16px;
         opacity:0.85;
-        color:#fbbf24;
+        color:#0058AB;
     }
 
     button{
@@ -39,8 +38,8 @@
         border:none;
         border-radius:12px;
         cursor:pointer;
-        background:#22c55e;
-        color:white;
+        background:#0058AB;
+        color:#FBD914;
     }
 
     #gif{
@@ -50,7 +49,6 @@
         border-radius:12px;
     }
 
-    /* ⏱ TIMER */
     #timer{
         font-size:48px;
         font-weight:bold;
@@ -60,7 +58,6 @@
         transition:transform 0.15s ease, color 0.2s ease;
     }
 
-    /* 🎥 Zoom */
     .zoom-in{
         animation:zoomIn 1.2s ease-out forwards;
     }
@@ -70,7 +67,6 @@
         100%{transform:scale(1.7);}
     }
 
-    /* 📳 Shake */
     .shake{
         animation:shake 0.1s infinite;
     }
@@ -83,7 +79,6 @@
         100%{transform:translate(2px,-2px);}
     }
 
-    /* 🌧 Konfetti */
     .confetti{
         position:fixed;
         width:10px;
@@ -99,7 +94,6 @@
         }
     }
 
-    /* 🎆 Canvas */
     #fireworks{
         position:fixed;
         top:0;
@@ -109,12 +103,27 @@
         pointer-events:none;
         z-index:999;
     }
+
+    /* 🌑 FAST FADE OVERLAY */
+    #fadeOverlay{
+        position:fixed;
+        top:0;
+        left:0;
+        width:100vw;
+        height:100vh;
+        background:black;
+        opacity:0;
+        pointer-events:none;
+        transition: opacity 1.2s ease;
+        z-index:10000;
+    }
 </style>
 </head>
 
 <body>
 
 <canvas id="fireworks"></canvas>
+<div id="fadeOverlay"></div>
 
 <div id="container">
 
@@ -141,8 +150,12 @@ const gif = document.getElementById("gif");
 const audio = document.getElementById("audio");
 const timerEl = document.getElementById("timer");
 const title = document.getElementById("title");
+const hint = document.getElementById("soundHint");
+const fade = document.getElementById("fadeOverlay");
 
 const colors = ["#ff4d4d","#ffd93d","#6a5cff","#00ffcc","#ff7ee2"];
+
+let redirectTriggered = false;
 
 /* 📳 Vibration */
 function vibrateSoft(){
@@ -152,7 +165,7 @@ function vibrateStrong(){
     if(navigator.vibrate) navigator.vibrate([200,100,200,100,600]);
 }
 
-/* 🌧 Konfetti */
+/* 🌧 Confetti */
 function startRainConfetti(){
     setInterval(()=>{
         let c=document.createElement("div");
@@ -165,7 +178,7 @@ function startRainConfetti(){
     },120);
 }
 
-/* 🎆 Canvas */
+/* 🎆 Fireworks */
 const canvas=document.getElementById("fireworks");
 const ctx=canvas.getContext("2d");
 
@@ -224,6 +237,26 @@ function finalExplosion(){
             createFirework(cx+(Math.random()*300-150),cy+(Math.random()*300-150),180);
         },i*50);
     }
+
+    /* 🌑 FAST FADE + REDIRECT (NO PAUSE) */
+    fade.style.opacity = 1;
+
+    audio.volume = 1;
+
+    let vol = audio.volume;
+    const fadeAudio = setInterval(()=>{
+        vol -= 0.08;
+        if(vol <= 0){
+            audio.pause();
+            clearInterval(fadeAudio);
+        } else {
+            audio.volume = vol;
+        }
+    },80);
+
+    setTimeout(()=>{
+        window.location.href = redirectURL;
+    }, 1200);
 }
 
 /* 🚀 START */
@@ -232,10 +265,11 @@ btn.addEventListener("click",()=>{
     btn.style.display="none";
     title.innerText="🎁🤪🎉";
 
+    hint.style.display="none";
+
     startRainConfetti();
     vibrateSoft();
 
-    // 🎵 SOUND direkt hier
     audio.play().catch(()=>{});
 
     gif.style.display="block";
@@ -254,12 +288,11 @@ btn.addEventListener("click",()=>{
 
         if(time<=0){
             clearInterval(interval);
-
             finalExplosion();
+        }
 
-            setTimeout(()=>{
-                window.location.href=redirectURL;
-            },2500);
+        if(time === 1 && !redirectTriggered){
+            redirectTriggered = true;
         }
 
     },1000);
