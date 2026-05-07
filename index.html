@@ -43,10 +43,14 @@
         border-radius:12px;
     }
 
+    /* ⏱ TIMER STYLE (NEU) */
     #timer{
-        font-size:32px;
+        font-size:48px;
+        font-weight:bold;
         margin-top:15px;
         display:none;
+        text-shadow:0 0 10px rgba(255,255,255,0.3);
+        transition: transform 0.15s ease, color 0.2s ease;
     }
 
     /* 🎥 Zoom */
@@ -59,7 +63,7 @@
         100% { transform: scale(1.7); }
     }
 
-    /* 📳 Screen Shake */
+    /* 📳 Shake */
     .shake {
         animation: shake 0.1s infinite;
     }
@@ -72,7 +76,7 @@
         100% { transform: translate(2px,-2px); }
     }
 
-    /* 🌧 Start-Konfetti */
+    /* 🌧 Konfetti */
     .confetti{
         position:fixed;
         width:10px;
@@ -157,6 +161,14 @@ const audio = document.getElementById("audio");
 const timerEl = document.getElementById("timer");
 const title = document.getElementById("title");
 
+const confettiColors = [
+    "#ff4d4d",
+    "#ffd93d",
+    "#6a5cff",
+    "#00ffcc",
+    "#ff7ee2"
+];
+
 /* 🎧 Unlock */
 const overlay = document.getElementById("audioOverlay");
 const overlayBox = document.getElementById("overlayBox");
@@ -176,7 +188,7 @@ function vibrateStrong(){
     if (navigator.vibrate) navigator.vibrate([200,100,200,100,600]);
 }
 
-/* 🌧 START KONFETTI */
+/* 🌧 Start-Konfetti */
 function startRainConfetti(){
     setInterval(()=>{
         let c=document.createElement("div");
@@ -189,7 +201,7 @@ function startRainConfetti(){
     },120);
 }
 
-/* 🎆 CANVAS FIREWORKS */
+/* 🎆 Canvas */
 const canvas=document.getElementById("fireworks");
 const ctx=canvas.getContext("2d");
 
@@ -199,7 +211,7 @@ canvas.height=window.innerHeight;
 let particles=[];
 
 function createFirework(x,y,amount){
-    const colors=["#ff4d4d","#ffd93d","#6a5cff","#00ffcc","#ff7ee2"];
+    const colors=confettiColors;
 
     for(let i=0;i<amount;i++){
         particles.push({
@@ -223,6 +235,7 @@ function update(){
 
         ctx.globalAlpha=p.alpha;
         ctx.fillStyle=p.color;
+
         ctx.beginPath();
         ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
         ctx.fill();
@@ -237,23 +250,17 @@ update();
 /* 💥 FINAL */
 function finalExplosion(){
 
-    document.body.classList.add("zoom-in");
-    document.body.classList.add("shake");
+    document.body.classList.add("zoom-in","shake");
 
     vibrateStrong();
 
     const cx=window.innerWidth/2;
     const cy=window.innerHeight/2;
 
-    // 💥 MEGA FEUERWERK (viel stärker)
     for(let i=0;i<35;i++){
         setTimeout(()=>{
-            createFirework(
-                cx+(Math.random()*300-150),
-                cy+(Math.random()*300-150),
-                180
-            );
-        },i*60);
+            createFirework(cx+(Math.random()*300-150),cy+(Math.random()*300-150),200);
+        },i*50);
     }
 }
 
@@ -280,6 +287,11 @@ btn.addEventListener("click",()=>{
 
         time--;
         timerEl.innerText=time;
+
+        // 🎨 Farbwechsel + Pop
+        timerEl.style.color = confettiColors[Math.floor(Math.random()*confettiColors.length)];
+        timerEl.style.transform="scale(1.4)";
+        setTimeout(()=>timerEl.style.transform="scale(1)",120);
 
         if(time<=0){
             clearInterval(interval);
