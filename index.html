@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎁🤪🎉</title>
+<title>🎁 Geschenk</title>
 
 <style>
     body{
@@ -18,29 +18,6 @@
         text-align:center;
         overflow:hidden;
         transition: transform 1.2s ease-out;
-    }
-
-    /* 🎥 Zoom */
-    .zoom-in {
-        animation: zoomIn 1.2s ease-out forwards;
-    }
-
-    @keyframes zoomIn {
-        0% { transform: scale(1); }
-        100% { transform: scale(1.8); }
-    }
-
-    /* 🌈 Puls Background */
-    .pulse-bg {
-        animation: pulseBg 1.2s ease-in-out infinite;
-    }
-
-    @keyframes pulseBg {
-        0% { background-color:#0d0d0d; }
-        25% { background-color:#1a1033; }
-        50% { background-color:#2a0f4a; }
-        75% { background-color:#1a1033; }
-        100% { background-color:#0d0d0d; }
     }
 
     #container{
@@ -72,6 +49,29 @@
         display:none;
     }
 
+    /* 🎥 Zoom */
+    .zoom-in {
+        animation: zoomIn 1.2s ease-out forwards;
+    }
+
+    @keyframes zoomIn {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.7); }
+    }
+
+    /* 📳 Screen Shake */
+    .shake {
+        animation: shake 0.1s infinite;
+    }
+
+    @keyframes shake {
+        0% { transform: translate(2px, 2px) rotate(0deg); }
+        25% { transform: translate(-2px, 3px) rotate(-0.5deg); }
+        50% { transform: translate(3px, -2px) rotate(0.5deg); }
+        75% { transform: translate(-3px, 2px) rotate(0deg); }
+        100% { transform: translate(2px, -2px) rotate(-0.5deg); }
+    }
+
     /* 🎆 Canvas */
     #fireworks{
         position:fixed;
@@ -82,6 +82,22 @@
         pointer-events:none;
         z-index:999;
     }
+
+    /* 🌧 Start-Konfetti */
+    .confetti{
+        position:fixed;
+        width:10px;
+        height:10px;
+        top:-10px;
+        animation:fall linear forwards;
+        z-index:1;
+    }
+
+    @keyframes fall{
+        to{
+            transform:translateY(110vh) rotate(720deg);
+        }
+    }
 </style>
 </head>
 
@@ -91,7 +107,7 @@
 
 <div id="container">
 
-    <h1>🎁 Bereit für dein Geschenk?</h1>
+    <h1 id="title">🎁 Bereit für dein Geschenk?</h1>
 
     <button id="startBtn">Geschenk öffnen</button>
 
@@ -111,6 +127,7 @@ const btn = document.getElementById("startBtn");
 const gif = document.getElementById("gif");
 const audio = document.getElementById("audio");
 const timerEl = document.getElementById("timer");
+const title = document.getElementById("title");
 
 /* 📳 Vibration */
 function vibrateSoft(){
@@ -121,7 +138,21 @@ function vibrateStrong(){
     if (navigator.vibrate) navigator.vibrate([200,100,200,100,600]);
 }
 
-/* 🎆 Canvas Setup */
+/* 🌧 START KONFETTI (Regen von oben) */
+function startRainConfetti(){
+    setInterval(() => {
+        let c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random()*100 + "vw";
+        c.style.background = `hsl(${Math.random()*360},100%,50%)`;
+        c.style.animationDuration = (2 + Math.random()*3) + "s";
+        document.body.appendChild(c);
+
+        setTimeout(() => c.remove(), 6000);
+    }, 120);
+}
+
+/* 🎆 CANVAS FIREWORKS */
 const canvas = document.getElementById("fireworks");
 const ctx = canvas.getContext("2d");
 
@@ -130,104 +161,102 @@ canvas.height = window.innerHeight;
 
 let particles = [];
 
-function createFirework(x, y){
+function createFirework(x, y, amount){
     const colors = ["#ff4d4d","#ffd93d","#6a5cff","#00ffcc","#ff7ee2"];
 
-    for(let i=0;i<80;i++){
+    for(let i=0;i<amount;i++){
         particles.push({
-            x: x,
-            y: y,
-            angle: Math.random() * Math.PI * 2,
-            speed: Math.random() * 6 + 2,
+            x,y,
+            angle: Math.random()*Math.PI*2,
+            speed: Math.random()*7+2,
             radius: Math.random()*3+1,
             color: colors[Math.floor(Math.random()*colors.length)],
-            alpha: 1
+            alpha:1
         });
     }
 }
 
-function updateFireworks(){
+function update(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    particles.forEach((p, index) => {
-        p.x += Math.cos(p.angle) * p.speed;
-        p.y += Math.sin(p.angle) * p.speed;
-        p.alpha -= 0.015;
+    particles.forEach((p,i)=>{
+        p.x += Math.cos(p.angle)*p.speed;
+        p.y += Math.sin(p.angle)*p.speed;
+        p.alpha -= 0.02;
 
         ctx.globalAlpha = p.alpha;
         ctx.fillStyle = p.color;
 
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+        ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
         ctx.fill();
 
-        if(p.alpha <= 0){
-            particles.splice(index,1);
-        }
+        if(p.alpha<=0) particles.splice(i,1);
     });
 
-    requestAnimationFrame(updateFireworks);
+    requestAnimationFrame(update);
 }
+update();
 
-updateFireworks();
-
-/* 🎯 Finale Explosion */
-function finalFireworks(){
+/* 💥 FINAL */
+function finalExplosion(){
 
     document.body.classList.add("zoom-in");
-    document.body.classList.add("pulse-bg");
+    document.body.classList.add("shake");
 
     vibrateStrong();
 
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
+    const cx = window.innerWidth/2;
+    const cy = window.innerHeight/2;
 
-    for(let i=0;i<8;i++){
-        setTimeout(() => {
+    // 🔥 MASSIVE FIREWORK BURST
+    for(let i=0;i<20;i++){
+        setTimeout(()=>{
             createFirework(
-                cx + (Math.random()*200-100),
-                cy + (Math.random()*200-100)
+                cx + (Math.random()*300-150),
+                cy + (Math.random()*300-150),
+                120 // viel mehr Partikel
             );
-        }, i * 200);
+        }, i*80);
     }
 }
 
-/* 🎬 Start */
-btn.addEventListener("click", () => {
+/* 🚀 START */
+btn.addEventListener("click", ()=>{
 
     btn.style.display = "none";
 
-    // 🎊 Starteffekt
-    createFirework(window.innerWidth/2, window.innerHeight/2);
+    // ✍️ Text ändern
+    title.innerText = "🎁🤪🎉";
+
+    // 🌧 Start-Konfetti
+    startRainConfetti();
+
     vibrateSoft();
 
-    // 🎵 Sound
-    audio.play().catch(()=>console.log("Audio blockiert"));
+    audio.play().catch(()=>{});
 
-    // 🖼 GIF
     gif.style.display = "block";
-
-    // ⏱ Timer
     timerEl.style.display = "block";
 
     let time = 10;
 
-    const interval = setInterval(() => {
+    const interval = setInterval(()=>{
 
         time--;
         timerEl.innerText = time;
 
-        if(time <= 0){
+        if(time<=0){
             clearInterval(interval);
 
-            finalFireworks();
+            finalExplosion();
 
-            setTimeout(() => {
+            setTimeout(()=>{
                 window.location.href = redirectURL;
             }, 2500);
         }
 
-    }, 1000);
+    },1000);
 
 });
 
