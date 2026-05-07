@@ -161,13 +161,19 @@ btn.addEventListener("click", () => {
             // 🛑 Regen stoppen
             stopConfettiRain();
 
-            // 💥 Finale Effekte
-            vibrateStrong();
-            confetti();
-
+            // 📳 starke Android-Vibration
+            if (navigator.vibrate) {
+                navigator.vibrate([300, 150, 300, 150, 600]);
+            }
+            
+            // 💥 große Explosion (viel mehr Konfetti auf einmal)
+            for(let j=0;j<5;j++){
+                setTimeout(() => confetti(), j * 200);
+            }
+            
             setTimeout(() => {
                 window.location.href = redirectURL;
-            }, 2000);
+            }, 2500);
         }
 
     }, 1000);
